@@ -1,0 +1,146 @@
+<%- include('partials/header') %>
+<main class="main-content">
+    <header class="page-header">
+        <h1>Settings</h1>
+    </header>
+
+    <% if (message) { %>
+        <div class="message <%= message.type %>">
+            <%= message.text %>
+        </div>
+    <% } %>
+
+    <div class="settings-form">
+        <div class="settings-section">
+            <h2>Grocy Settings</h2>
+            <form action="/settings/grocy" method="POST">
+                <div class="form-group">
+                    <label for="grocy_url">Grocy URL</label>
+                    <input type="text" id="grocy_url" name="grocy_url" value="<%= locals.settings.grocy_url || '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="grocy_api_key">Grocy API Key</label>
+                    <input type="text" id="grocy_api_key" name="grocy_api_key" value="<%= locals.settings.grocy_api_key || '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="check_interval">Overview Refresh Interval (in seconds)</label>
+                    <input type="number" id="check_interval" name="check_interval" value="<%= locals.settings.check_interval || 300 %>">
+                    <small>Set to 0 to disable auto-refresh.</small>
+                </div>
+                <div class="form-group">
+                    <label for="default_shopping_list_id">Default Shopping List</label>
+                    <select id="default_shopping_list_id" name="default_shopping_list_id">
+                        <% if (shoppingLists) { %>
+                            <% shoppingLists.forEach(list => { %>
+                                <option value="<%= list.id %>" <%= (locals.settings.default_shopping_list_id === list.id) ? 'selected' : '' %>>
+                                    <%= list.name %>
+                                </option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="">No lists found</option>
+                        <% } %>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Grocy Settings</button>
+            </form>
+        </div>
+
+        <div class="settings-section">
+            <h2>Weather & Display Settings</h2>
+            <form action="/settings/weather" method="POST">
+                <div class="form-group">
+                    <label for="weather_api_key">OpenWeatherMap API Key</label>
+                    <input type="text" id="weather_api_key" name="weather_api_key" value="<%= locals.settings.weather_api_key || '' %>">
+                </div>
+                <div class="form-group">
+                    <label for="weather_location">Weather Location (e.g., Cheektowaga, NY, USA)</label>
+                    <input type="text" id="weather_location" name="weather_location" value="<%= locals.settings.weather_location || '' %>">
+                </div>
+                <div class="form-group">
+                    <label for="weather_units">Temperature Units</label>
+                    <select id="weather_units" name="weather_units">
+                        <option value="metric" <%= locals.settings.weather_units === 'metric' ? 'selected' : '' %>>Celsius (°C)</option>
+                        <option value="imperial" <%= locals.settings.weather_units === 'imperial' ? 'selected' : '' %>>Fahrenheit (°F)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date_format">Date Format</label>
+                    <select id="date_format" name="date_format">
+                        <option value="YYYY-MM-DD" <%= locals.settings.date_format === 'YYYY-MM-DD' ? 'selected' : '' %>>YYYY-MM-DD</option>
+                        <option value="MM-DD-YYYY" <%= locals.settings.date_format === 'MM-DD-YYYY' ? 'selected' : '' %>>MM-DD-YYYY</option>
+                        <option value="DD-MM-YYYY" <%= locals.settings.date_format === 'DD-MM-YYYY' ? 'selected' : '' %>>DD-MM-YYYY</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="time_format">Time Format</label>
+                    <select id="time_format" name="time_format">
+                        <option value="HH:mm" <%= locals.settings.time_format === 'HH:mm' ? 'selected' : '' %>>24 Hour (HH:mm)</option>
+                        <option value="hh:mm AM/PM" <%= locals.settings.time_format === 'hh:mm AM/PM' ? 'selected' : '' %>>12 Hour (hh:mm AM/PM)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Display Settings</button>
+            </form>
+        </div>
+
+        <% if (locals.isAdmin) { %>
+        <div class="settings-section">
+            <h2>User Management</h2>
+            <h3>Add New User</h3>
+            <form action="/settings/user/add" method="POST">
+                <div class="form-group">
+                    <label for="new_username">Username</label>
+                    <input type="text" id="new_username" name="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Password</label>
+                    <input type="password" id="new_password" name="password" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="isAdmin" value="true"> Make Admin
+                    </label>
+                </div>
+                <button type="submit" class="btn">Add User</button>
+            </form>
+
+            <h3>Delete User</h3>
+            <ul class="user-list">
+                <% users.forEach(user => { %>
+                    <li>
+                        <span><%= user.username %></span>
+                        <% if (user.username !== 'admin') { %>
+                            <form action="/settings/user/delete/<%= user.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-delete">Delete</button>
+                            </form>
+                        <% } %>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+        <% } %>
+
+        <div class="settings-section">
+            <h2>Change Password</h2>
+            <form action="/settings/user/change-password" method="POST">
+				<div style="position: absolute; left: -9999px;">
+				  <label for="username">Username</label>
+				  <input type="text" id="username" name="username" value="<%= locals.currentUser.username %>" autocomplete="username">
+				</div>
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn">Change Password</button>
+            </form>
+        </div>
+    </div>
+</main>
+<%- include('partials/footer') %>

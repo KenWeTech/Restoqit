@@ -1,0 +1,86 @@
+<%- include('partials/header') %>
+<header class="page-header">
+    <h1>Overview</h1>
+    <div class="header-info">
+        <div id="clock" 
+            data-date-format="<%= locals.settings?.date_format || 'YYYY-MM-DD' %>"
+            data-time-format="<%= locals.settings?.time_format || 'HH:mm' %>">
+        </div>
+<% if (weather && typeof weather.temp === 'number') { %>
+    <div class="weather-info">
+        <img src="<%= weather.icon %>" alt="Weather icon">
+        <% 
+            // Get the temperature from the weather object, which is already in the correct unit
+            const displayTemp = weather.temp;
+            let tempUnit;
+
+            // Check if the user's preference is 'imperial' (Fahrenheit)
+            if (locals.settings && locals.settings.weather_units === 'imperial') {
+                tempUnit = '°F';
+            } else {
+                tempUnit = '°C';
+            }
+        %>
+        <span><%= Math.round(displayTemp) %><%= tempUnit %>, <%= weather.description %></span>
+    </div>
+        <% } else if (locals.settings && locals.settings.weather_location) { %>
+            <div class="weather-info">
+                <span>Weather for <%= locals.settings.weather_location %> is unavailable.</span>
+            </div>
+        <% } %>
+    </div>
+</header>
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h2><a href="/grocery-list">Grocery List</a></h2>
+         <% if (groceryList.length > 0) { %>
+            <ul>
+                <% groceryList.slice(0, 5).forEach(item => { %>
+                    <li><%= item.note || item.product_name %></li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>Your grocery list is empty.</p>
+        <% } %>
+    </div>
+    <div class="dashboard-card">
+        <h2><a href="/low-stock">Low Stock</a></h2>
+        <% if (lowStock.length > 0) { %>
+            <ul>
+                <% lowStock.slice(0, 5).forEach(item => { %>
+                    <li><%= item.product_name %> (<%= item.amount %>)</li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>All stock levels are okay.</p>
+        <% } %>
+    </div>
+    <div class="dashboard-card">
+        <h2><a href="/expiring">Expiring Soon</a></h2>
+        <% if (expiring.length > 0) { %>
+            <ul class="expiring-list">
+                <% expiring.slice(0, 5).forEach(item => { %>
+                    <li><%= item.product_name %> - <%= new Date(item.best_before_date).toLocaleDateString() %></li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>Nothing is expiring soon.</p>
+        <% } %>
+    </div>
+    <div class="dashboard-card">
+        <h2><a href="/expired">Expired</a></h2>
+        <% if (expired.length > 0) { %>
+            <ul class="expired-list">
+                <% expired.slice(0, 5).forEach(item => { %>
+                    <li><%= item.product_name %> - <%= new Date(item.best_before_date).toLocaleDateString() %></li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>Nothing has expired.</p>
+        <% } %>
+    </div>
+</div>
+<script>
+    const checkInterval = <%= locals.checkInterval || 300000 %>;
+</script>
+<%- include('partials/footer') %>

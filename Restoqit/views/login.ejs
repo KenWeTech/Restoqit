@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Restoqit">
+    <meta name="application-name" content="Restoqit">
+    <meta name="theme-color" content="#3b5f21">
+    <title>Login - Restoqit</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/assets/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <img src="/assets/logo.png" alt="Restoqit Logo" style="height: 7rem; margin-bottom: 1.5rem; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));">
+		<h2>Restoqit</h2>
+		<h3 id="random-phrase"></h3>
+        <% if (error) { %>
+            <p class="error-message"><%= error %></p>
+        <% } %>
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+<script src="/js/main.js"></script>
+<script src="/js/login-phrase.js"></script>
+</body>
+</html>

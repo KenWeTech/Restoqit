@@ -1,0 +1,16 @@
+{
+  "name": "Restoqit",
+  "short_name": "Restoqit",
+  "description": "A simple overview of things you might need to restock for your Grocy instance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#c8e5b3",
+  "theme_color": "#3b5f21",
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ]
+}

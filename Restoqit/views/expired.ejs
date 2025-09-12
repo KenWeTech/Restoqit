@@ -1,0 +1,16 @@
+<%- include('partials/header') %>
+<h1>Expired Items</h1>
+<ul class="item-list expired-list">
+    <% if (expired.length > 0) { %>
+        <% expired.forEach(item => { %>
+            <li>
+                <span class="item-name"><%= item.product_name %></span>
+                <span class="item-detail"><%= item.amount %> remaining</span>
+                <span class="item-date">Expired: <%= new Date(item.best_before_date).toLocaleDateString() %></span>
+            </li>
+        <% }); %>
+    <% } else { %>
+        <p>No expired items found.</p>
+    <% } %>
+</ul>
+<%- include('partials/footer') %>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Restoqit">
+    <meta name="application-name" content="Restoqit">
+    <meta name="theme-color" content="#3b5f21">
+    <title>Restoqit</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/assets/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <button id="menu-toggle" class="menu-toggle">☰</button>
+	<div style="position: fixed; top: 0; left: 0; width: 100%; background-color: var(--sidebar-bg); z-index: 999; display: flex; justify-content: center; padding: 0.5rem 1rem; box-shadow: var(--shadow);">
+	<a href="/" class="home-logo">
+	<img src="/assets/logo.png" alt="Home" style="height: 3rem; filter: drop-shadow(0 0 15px rgba(0, 0, 0, 1));">
+	</a>
+	</div>
+	<button id="dark-mode-toggle" class="menu-toggle" style="right: 1rem; left: auto;">🌙</button>
+
+    <div class="container">
+        <%- include('nav') %>
+        <main class="main-content">
+

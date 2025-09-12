@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+<h1>Low Stock Items</h1>
+<ul class="item-list">
+    <% if (lowStock.length > 0) { %>
+        <% lowStock.forEach(item => { %>
+            <li>
+                <span class="item-name"><%= item.product_name %></span>
+                <span class="item-detail">Currently <%= item.amount %> in stock</span>
+            </li>
+        <% }); %>
+    <% } else { %>
+        <p>No items are low on stock.</p>
+    <% } %>
+</ul>
+<%- include('partials/footer') %>

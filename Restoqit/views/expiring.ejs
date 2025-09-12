@@ -1,0 +1,16 @@
+<%- include('partials/header') %>
+<h1>Expiring Soon</h1>
+<ul class="item-list expiring-list">
+    <% if (expiring.length > 0) { %>
+        <% expiring.forEach(item => { %>
+            <li>
+                <span class="item-name"><%= item.product_name %></span>
+                <span class="item-detail"><%= item.amount %> remaining</span>
+                <span class="item-date">Expires: <%= new Date(item.best_before_date).toLocaleDateString() %></span>
+            </li>
+        <% }); %>
+    <% } else { %>
+        <p>Nothing is expiring soon.</p>
+    <% } %>
+</ul>
+<%- include('partials/footer') %>

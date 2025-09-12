@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+<header class="page-header">
+    <div class="page-header-container">
+        <h1>Grocery List</h1>
+        <select id="shopping-list-select" class="list-select-dropdown">
+            <% if (shoppingLists && shoppingLists.length > 0) { %>
+                <% shoppingLists.forEach(list => { %>
+                    <option value="<%= list.id %>"><%= list.name %></option>
+                <% }); %>
+            <% } else { %>
+                <option value="">No lists found</option>
+            <% } %>
+        </select>
+    </div>
+</header>
+<div class="item-list-container">
+    <ul id="grocery-list-items" class="item-list grocery-list">
+        </ul>
+    <p id="no-items-message" class="hidden">The list is empty. Go add something in Grocy!</p>
+</div>
+<%- include('partials/footer') %>
