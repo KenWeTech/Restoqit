@@ -30,6 +30,12 @@ Main screen
   <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_Dash.png?raw=true" alt="Overview" width="800"/>
 </p>
 
+Main screen with `dark mode` active
+
+<p align="center">
+  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_Dash_DarkM.png?raw=true" alt="Overview Dark Mode" width="800"/>
+</p>
+
 Grocery list section with menu open
 
 <p align="center">
