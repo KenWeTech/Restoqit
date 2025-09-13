@@ -39,7 +39,13 @@ Main screen with `dark mode` active
 Grocery list section with menu open
 
 <p align="center">
-  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_GL.png?raw=true" alt="Dashboard" width="800"/>
+  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_GL.png?raw=true" alt="Grocery List" width="800"/>
+</p>
+
+Mobile view in both modes
+
+<p align="center">
+  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_Mobile.GIF?raw=true" alt="Mobile View" width="300"/>
 </p>
 
 ## Getting Started (Docker Recommended)
