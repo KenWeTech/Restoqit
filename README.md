@@ -22,6 +22,19 @@ Restoqit provides a clean, responsive PWA dashboard that connects to your Grocy 
     
 -   **Customizable:** Features settings for your Grocy connection, weather display, date/time formats, and a dark mode.
     
+### Screenshots
+
+Main screen
+
+<p align="center">
+  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_Dash.png?raw=true" alt="Overview" width="800"/>
+</p>
+
+Grocery list section with menu open
+
+<p align="center">
+  <img src="https://github.com/KenWeTech/Restoqit/blob/main/Restoqit_GL.png?raw=true" alt="Dashboard" width="800"/>
+</p>
 
 ## Getting Started (Docker Recommended)
 
