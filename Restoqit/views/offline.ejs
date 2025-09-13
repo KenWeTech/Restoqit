@@ -20,7 +20,12 @@
     </style>
 </head>
 <body>
-    <div class="offline-container">
+    <div style="position: fixed; top: 0; left: 0; width: 100%; background-color: var(--sidebar-bg); z-index: 999; display: flex; justify-content: center; padding: 0.5rem 1rem; box-shadow: var(--shadow);">
+	<a href="/" class="home-logo">
+	<img src="/assets/logo.png" alt="Home" style="height: 3rem; filter: drop-shadow(0 0 15px rgba(0, 0, 0, 1));">
+	</a>
+	</div>
+	<div class="offline-container">
         <h1>You are Offline</h1>
         <p>Can't load new data from your Grocy server right now. Please check your internet connection.</p>
         <p>Any pages you've already visited while online might be available.</p>
