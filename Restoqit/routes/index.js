@@ -28,11 +28,13 @@ async function getGrocySettings(req, res, next) {
         }
         res.locals.settings = settings || {};
         res.locals.checkInterval = (settings && settings.check_interval) ? settings.check_interval * 1000 : 300000;
-        next();
+        res.locals.timezone = req.app.locals.timezone;
+		next();
     } catch (err) {
         console.error('Error fetching settings in middleware:', err.message);
         req.session.message = { type: 'error', text: 'Failed to load settings.' };
-        return res.redirect('/settings');
+        res.locals.timezone = req.app.locals.timezone;
+		return res.redirect('/settings');
     }
 }
 
