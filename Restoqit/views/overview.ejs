@@ -4,7 +4,8 @@
     <div class="header-info">
         <div id="clock" 
             data-date-format="<%= locals.settings?.date_format || 'YYYY-MM-DD' %>"
-            data-time-format="<%= locals.settings?.time_format || 'HH:mm' %>">
+            data-time-format="<%= locals.settings?.time_format || 'HH:mm' %>"
+			data-timezone="<%= locals.timezone %>">
         </div>
 <% if (weather && typeof weather.temp === 'number') { %>
     <div class="weather-info">
