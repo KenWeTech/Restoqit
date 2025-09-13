@@ -1,7 +1,7 @@
 {
   "name": "Restoqit",
   "short_name": "Restoqit",
-  "description": "A simple overview of things you might need to restock for your Grocy instance.",
+  "description": "An app that shows a simple overview of things you might need to restock for your Grocy instance.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#c8e5b3",
@@ -13,4 +13,5 @@
       "type": "image/png"
     }
   ]
+
 }
