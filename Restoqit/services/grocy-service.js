@@ -2,8 +2,9 @@ const fetch = require('node-fetch');
 
 async function grocyApiRequest(settings, endpoint) {
     if (!settings.grocy_url || !settings.grocy_api_key) {
-        throw new Error('Grocy URL or API Key is not configured.');
-    }
+        console.warn('Grocy URL or API Key is not configured. Skipping API request.');
+        return null;
+	}
     const url = `${settings.grocy_url}/api/${endpoint}`;
     const headers = {
         'GROCY-API-KEY': settings.grocy_api_key,
