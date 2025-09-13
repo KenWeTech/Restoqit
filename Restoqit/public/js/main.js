@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dateFormat = clockElement.dataset.dateFormat || 'YYYY-MM-DD';
             const timeFormat = clockElement.dataset.timeFormat || 'HH:mm';
+            const timeZone = clockElement.dataset.timezone;
+
+            const options = { timeZone: timeZone };
 
             let dateString = '';
             const year = now.getFullYear();
@@ -38,14 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     dateString = `${day}-${month}-${year}`;
                     break;
                 default:
-                    dateString = now.toLocaleDateString();
+                    dateString = now.toLocaleDateString('en-US', options);
             }
 
             let timeString = '';
             if (timeFormat === 'hh:mm AM/PM') {
-                timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, ...options });
             } else {
-                timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, ...options });
             }
 
             clockElement.textContent = `${dateString} | ${timeString}`;
@@ -185,4 +188,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
