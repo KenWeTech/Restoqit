@@ -66,6 +66,11 @@ This is the simplest method to get Restoqit running in minutes.
         # network_mode: "host"
         ports:
           - "8686:8686"
+    
+        # Pass environment variables from your .env file
+        env_file:
+          - ./.env
+    
         volumes:
           - ./restoqit_data:/app/data
     
