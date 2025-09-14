@@ -58,7 +58,7 @@ This is the simplest method to get Restoqit running in minutes.
 
     services:
       restoqit:
-        image: ghcr.io/KenWeTech/restoqit:latest
+        image: ghcr.io/kenwetech/restoqit:latest
         container_name: restoqit
         restart: unless-stopped
         # To enable mDNS discovery, uncomment the 'network_mode: "host"' line below.
