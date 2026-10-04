@@ -12,7 +12,7 @@ Restoqit provides a clean, responsive PWA dashboard that connects to your Grocy 
 
 - **At-a-Glance Overview:** Main dashboard shows a summary of items that are expired, expiring soon, low in stock, and on your grocery list.
 - **Detailed Views:** Separate pages for Expired, Expiring Soon, Low Stock, and Grocery Lists.
-- **Interactive Stock Actions (Optional):** Add low/expired items directly to a shopping list or mark items as spoiled (remove them) right from those pages. 
+- **Interactive Stock Actions (Optional):** Add low stock or expired items directly to a selected shopping list, or mark items as spoiled to remove them from both Grocy and the expired page. 
 - **PWA Ready:** Installable on mobile and desktop for a native-app experience with offline viewing of the last data you loaded.
 - **Interactive Grocery List:** Tap items to visually mark them off as you shop.
 - **Secure & Self-Hosted:** Your data stays on your network.
