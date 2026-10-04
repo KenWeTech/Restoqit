@@ -18,15 +18,11 @@
 </head>
 <body>
     <button id="menu-toggle" class="menu-toggle">☰</button>
-	<div style="position: fixed; top: 0; left: 0; width: 100%; background-color: var(--sidebar-bg); z-index: 999; display: flex; justify-content: center; padding: 0.5rem 1rem; box-shadow: var(--shadow);">
-	<a href="/" class="home-logo">
-	<img src="/assets/logo.png" alt="Home" style="height: 3rem; filter: drop-shadow(0 0 15px rgba(0, 0, 0, 1));">
-	</a>
-	</div>
-	<button id="dark-mode-toggle" class="menu-toggle" style="right: 1rem; left: auto;">🌙</button>
-
+    <div style="position: fixed; top: 0; left: 0; width: 100%; box-sizing: border-box; background-color: var(--sidebar-bg); z-index: 999; display: flex; justify-content: center; align-items: center; padding: 0.5rem 1rem; box-shadow: var(--shadow);">
+        <a href="/" class="home-logo" style="display: flex; align-items: center;">
+            <img src="/assets/logo.png" alt="Home" style="height: 3rem; filter: drop-shadow(0 0 15px rgba(0, 0, 0, 1));">
+        </a>
+    </div>
     <div class="container">
         <%- include('nav') %>
         <main class="main-content">
-
-
