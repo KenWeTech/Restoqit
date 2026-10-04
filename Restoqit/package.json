@@ -1,6 +1,6 @@
 {
   "name": "Restoqit",
-  "version": "1.0.0",
+  "version": "1.6.0",
   "description": "An app that shows a simple overview of things you might need to restock for your Grocy instance.",
   "main": "server.js",
   "scripts": {
