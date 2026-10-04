@@ -1,12 +1,25 @@
 <%- include('partials/header') %>
 <h1>Expired Items</h1>
-<ul class="item-list expired-list">
+<ul class="item-list expired-list" id="expired-list">
     <% if (expired.length > 0) { %>
         <% expired.forEach(item => { %>
-            <li>
-                <span class="item-name"><%= item.product_name %></span>
-                <span class="item-detail"><%= item.amount %> remaining</span>
-                <span class="item-date">Expired: <%= new Date(item.best_before_date).toLocaleDateString() %></span>
+            <li data-product-id="<%= item.product_id %>" data-stock-id="<%= item.id %>" data-amount="<%= item.amount %>">
+                <div class="item-info">
+                    <span class="item-name"><%= item.product_name %></span>
+                    <span class="item-detail"><%= item.amount %> remaining</span>
+                    <span class="item-date">Expired: <%= new Date(item.best_before_date).toLocaleDateString() %></span>
+                </div>
+                <% if (showActions) { %>
+                    <div class="item-actions">
+                        <select class="action-shopping-list">
+                            <% shoppingLists.forEach(list => { %>
+                                <option value="<%= list.id %>"><%= list.name %></option>
+                            <% }); %>
+                        </select>
+                        <button class="btn btn-add-list">Add to List</button>
+                        <button class="btn btn-delete btn-remove-spoiled">Remove (Spoil)</button>
+                    </div>
+                <% } %>
             </li>
         <% }); %>
     <% } else { %>

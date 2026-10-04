@@ -23,13 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeFormat = clockElement.dataset.timeFormat || 'HH:mm';
             const timeZone = clockElement.dataset.timezone;
 
-            const options = { timeZone: timeZone };
+            const options = (timeZone && timeZone.trim()) ? { timeZone: timeZone.trim() } : {};
+
+            const parts = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                ...options
+            }).formatToParts(now);
+
+            const dateParts = {};
+            parts.forEach(p => {
+                if (p.type !== 'literal') dateParts[p.type] = p.value;
+            });
+
+            const { year, month, day } = dateParts;
 
             let dateString = '';
-            const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const day = now.getDate().toString().padStart(2, '0');
-
             switch (dateFormat) {
                 case 'YYYY-MM-DD':
                     dateString = `${year}-${month}-${day}`;
@@ -65,6 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     const selectElement = document.getElementById('shopping-list-select');
     const listItemsContainer = document.getElementById('grocery-list-items');
     const noItemsMessage = document.getElementById('no-items-message');
@@ -73,14 +91,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const renderList = (items) => {
             listItemsContainer.innerHTML = '';
-            if (items.length > 0) {
+            if (Array.isArray(items) && items.length > 0) {
                 if (noItemsMessage) noItemsMessage.classList.add('hidden');
                 items.forEach(item => {
                     const li = document.createElement('li');
                     li.classList.add('grocery-item');
+
+                    if (item.id) li.dataset.id = item.id;
+                    if (item.product_id) li.dataset.productId = item.product_id;
+                    li.dataset.amount = item.amount || 1;
+
+                    const name = item.note || item.product_name || 'Unknown Item';
+                    const amount = item.amount || 1;
+
                     li.innerHTML = `
-                        <span class="item-name">${item.note || item.product_name}</span>
-                        <span class="item-detail">${item.amount || ''}</span>
+                        <div class="item-info">
+                            <span class="item-name">${escapeHtml(name)}</span>
+                            <span class="item-detail">Quantity: ${escapeHtml(amount.toString())}</span>
+                        </div>
                     `;
                     if (item.tapped) {
                         li.classList.add('tapped');
@@ -94,31 +122,31 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         async function fetchListAndRender(listId) {
-            const cachedData = localStorage.getItem(`grocery-list-${listId}`);
-            let listData;
+            if (!listId) return;
 
-            if (cachedData) {
-                console.log('Loading list from cache.');
-                listData = JSON.parse(cachedData);
-            } else {
-                listItemsContainer.innerHTML = '<p>Loading list...</p>';
-                if (noItemsMessage) noItemsMessage.classList.add('hidden');
+            listItemsContainer.innerHTML = '<p>Loading list...</p>';
+            if (noItemsMessage) noItemsMessage.classList.add('hidden');
 
-                try {
-                    const response = await fetch(`/api/grocery-list-items?list_id=${listId}`);
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch list items');
-                    }
-                    const data = await response.json();
-                    listData = data.groceryList.map(item => ({ ...item, tapped: false }));
-                    localStorage.setItem(`grocery-list-${listId}`, JSON.stringify(listData));
-                } catch (error) {
-                    console.error('Error fetching list:', error);
-                    listItemsContainer.innerHTML = '<p>Error loading list. Please try again.</p>';
-                    return;
+            try {
+                const response = await fetch(`/api/grocery-list-items?list_id=${listId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch list items');
                 }
+                const data = await response.json();
+                const rawItems = Array.isArray(data.groceryList) ? data.groceryList : [];
+
+                const savedTapped = JSON.parse(localStorage.getItem(`tapped-list-${listId}`)) || {};
+
+                const listData = rawItems.map(item => ({
+                    ...item,
+                    tapped: !!savedTapped[item.id]
+                }));
+
+                renderList(listData);
+            } catch (error) {
+                console.error('Error fetching list:', error);
+                listItemsContainer.innerHTML = '<p>Error loading list. Please try again.</p>';
             }
-            renderList(listData);
         }
 
         listItemsContainer.addEventListener('click', (event) => {
@@ -127,13 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 clickedItem.classList.toggle('tapped');
 
                 const listId = selectElement.value;
-                const listData = JSON.parse(localStorage.getItem(`grocery-list-${listId}`));
-                if (listData) {
-                    const itemIndex = Array.from(listItemsContainer.children).indexOf(clickedItem);
-                    if (itemIndex > -1) {
-                        listData[itemIndex].tapped = clickedItem.classList.contains('tapped');
-                        localStorage.setItem(`grocery-list-${listId}`, JSON.stringify(listData));
-                    }
+                const itemId = clickedItem.dataset.id;
+
+                if (listId && itemId) {
+                    const savedTapped = JSON.parse(localStorage.getItem(`tapped-list-${listId}`)) || {};
+                    savedTapped[itemId] = clickedItem.classList.contains('tapped');
+                    localStorage.setItem(`tapped-list-${listId}`, JSON.stringify(savedTapped));
                 }
             }
         });
@@ -148,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (storedListId && selectElement.querySelector(`option[value="${storedListId}"]`)) {
             selectElement.value = storedListId;
         } else if (selectElement.options.length > 0) {
-
             selectElement.value = selectElement.options[0].value;
         }
 
@@ -161,18 +187,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const currentTheme = localStorage.getItem('theme');
 
-    if (currentTheme) {
-        body.classList.add(currentTheme);
+    const updateToggleUI = () => {
+        if (!toggleButton) return;
+        const isDark = body.classList.contains('dark-mode');
+
+        toggleButton.textContent = isDark ? '☀️' : '🌙';
+    };
+
+    if (currentTheme === 'dark-mode' || currentTheme === 'dark') {
+        body.classList.add('dark-mode');
     }
 
+    updateToggleUI();
+
     if (toggleButton) {
-        toggleButton.addEventListener('click', () => {
+        toggleButton.addEventListener('click', (e) => {
+            e.preventDefault();
             body.classList.toggle('dark-mode');
-            let theme = 'light';
-            if (body.classList.contains('dark-mode')) {
-                theme = 'dark-mode';
-            }
-            localStorage.setItem('theme', theme);
+
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark-mode' : 'light');
+
+            updateToggleUI();
         });
     }
 
@@ -187,4 +223,91 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    async function handleStockAction(e) {
+    const button = e.target;
+    if (!button.classList.contains('btn-add-list') && !button.classList.contains('btn-remove-spoiled')) {
+        return;
+    }
+
+    const li = button.closest('li');
+    const { productId, stockId, amount } = li.dataset;
+
+    let endpoint = '';
+    let body = {};
+
+    if (button.classList.contains('btn-add-list')) {
+        const select = li.querySelector('.action-shopping-list');
+        const selectedListId = select ? select.value : null;
+
+        if (!selectedListId) {
+            alert('Please select a list.');
+            return;
+        }
+
+        endpoint = '/api/stock/add-to-list';
+        body = { productId, listId: selectedListId };
+
+    } else if (button.classList.contains('btn-remove-spoiled')) {
+        const confirmed = confirm('Are you sure you want to remove this item? This will mark it as spoiled and remove it from your stock.');
+        if (!confirmed) {
+            return;
+        }
+
+        endpoint = '/api/stock/remove-spoiled';
+        body = { productId, stockId, amount };
+    }
+
+    try {
+        button.disabled = true;
+        button.textContent = '...';
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+            if (button.classList.contains('btn-add-list')) {
+
+                if (body.listId) {
+                    localStorage.removeItem(`grocery-list-${body.listId}`);
+                }
+                button.textContent = 'Added!';
+                setTimeout(() => {
+                    button.textContent = 'Add to List';
+                    button.disabled = false;
+                }, 2000);
+            } else {
+
+                li.style.opacity = '0';
+                setTimeout(() => li.remove(), 300);
+            }
+        } else {
+            throw new Error('Action failed');
+        }
+
+    } catch (error) {
+        console.error('Error performing stock action:', error);
+        button.textContent = 'Error!';
+        button.style.backgroundColor = 'var(--expired-color)';
+        setTimeout(() => {
+            button.disabled = false;
+            if (button.classList.contains('btn-add-list')) {
+                button.textContent = 'Add to List';
+            } else {
+                button.textContent = 'Remove (Spoil)';
+            }
+            button.style.backgroundColor = '';
+        }, 3000);
+    }
+}
+
+    document.getElementById('expired-list')?.addEventListener('click', handleStockAction);
+    document.getElementById('expiring-list')?.addEventListener('click', handleStockAction);
+    document.getElementById('low-stock-list')?.addEventListener('click', handleStockAction);
 });

@@ -18,6 +18,16 @@ db.run = promisify(db.run);
 db.get = promisify(db.get);
 db.all = promisify(db.all);
 
+async function addColumnIfNotExists(tableName, columnName, columnDef) {
+    try {
+        await db.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDef}`);
+    } catch (err) {
+        if (!err.message.includes('duplicate column name')) {
+            throw err;
+        }
+    }
+}
+
 async function initializeDB() {
     console.log('Connected to the SQLite database.');
 
@@ -40,7 +50,9 @@ async function initializeDB() {
             weather_location TEXT,
             weather_units TEXT DEFAULT 'metric',
             date_format TEXT DEFAULT 'YYYY-MM-DD',
-            time_format TEXT DEFAULT 'HH:mm'
+            time_format TEXT DEFAULT 'HH:mm',
+            enable_stock_actions BOOLEAN DEFAULT 0,
+            stock_actions_admin_only BOOLEAN DEFAULT 1
         );
     `;
 
@@ -49,18 +61,11 @@ async function initializeDB() {
         await db.run(settingsTableSql);
         console.log('Tables checked/created successfully.');
 
-        try {
-            await db.run(`ALTER TABLE settings ADD COLUMN weather_units TEXT DEFAULT 'metric'`);
-            await db.run(`ALTER TABLE settings ADD COLUMN date_format TEXT DEFAULT 'YYYY-MM-DD'`);
-            await db.run(`ALTER TABLE settings ADD COLUMN time_format TEXT DEFAULT 'HH:mm'`);
-        } catch (err) {
-            if (err.message.includes('duplicate column name')) {
-                console.log('New columns already exist in the settings table.');
-            } else {
-                throw err; 
-
-            }
-        }
+        await addColumnIfNotExists('settings', 'weather_units', "TEXT DEFAULT 'metric'");
+        await addColumnIfNotExists('settings', 'date_format', "TEXT DEFAULT 'YYYY-MM-DD'");
+        await addColumnIfNotExists('settings', 'time_format', "TEXT DEFAULT 'HH:mm'");
+        await addColumnIfNotExists('settings', 'enable_stock_actions', "BOOLEAN DEFAULT 0");
+        await addColumnIfNotExists('settings', 'stock_actions_admin_only', "BOOLEAN DEFAULT 1");
 
         const row = await db.get("SELECT COUNT(id) as count FROM settings");
         if (row.count === 0) {
@@ -99,4 +104,3 @@ async function createAdminUser() {
 }
 
 module.exports = { db, initializeDB };
-

@@ -2,9 +2,8 @@ const fetch = require('node-fetch');
 
 async function grocyApiRequest(settings, endpoint) {
     if (!settings.grocy_url || !settings.grocy_api_key) {
-        console.warn('Grocy URL or API Key is not configured. Skipping API request.');
-        return null;
-	}
+        throw new Error('Grocy URL or API Key is not configured.');
+    }
     const url = `${settings.grocy_url}/api/${endpoint}`;
     const headers = {
         'GROCY-API-KEY': settings.grocy_api_key,
@@ -20,6 +19,35 @@ async function grocyApiRequest(settings, endpoint) {
         console.error('Error fetching from Grocy API:', error);
         return null;
     }
+}
+
+async function grocyApiPostRequest(settings, endpoint, body) {
+    if (!settings.grocy_url || !settings.grocy_api_key) {
+        throw new Error('Grocy URL or API Key is not configured.');
+    }
+    const url = `${settings.grocy_url}/api/${endpoint}`;
+    const headers = {
+        'GROCY-API-KEY': settings.grocy_api_key,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    };
+
+    const response = await fetch(url, { 
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body) 
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Grocy API POST error response:', errorText);
+        throw new Error(`Grocy API error (${response.status}): ${errorText || response.statusText}`);
+    }
+
+    if (response.status === 204) { 
+        return { success: true };
+    }
+    return await response.json();
 }
 
 async function getAllShoppingLists(settings) {
@@ -81,6 +109,42 @@ async function getVolatileStock(settings) {
     return { expired, expiring, lowStock };
 }
 
+async function addProductToShoppingList(settings, productId, listId) {
+    if (!productId || !listId) return null;
+    try {
+        const parsedProductId = parseInt(productId, 10);
+        const parsedListId = parseInt(listId, 10);
+
+        const body = {
+            "product_id": parsedProductId,
+            "list_id": parsedListId,
+            "shopping_list_id": parsedListId,
+            "amount": 1
+        };
+        return await grocyApiPostRequest(settings, 'stock/shoppinglist/add-product', body);
+    } catch (error) {
+        console.error('Error adding product to shopping list:', error);
+        return null;
+    }
+}
+
+async function consumeProduct(settings, productId, amount, stockId = null, spoiled = false) {
+    if (!productId || !amount) {
+        throw new Error('Product ID and amount are required.');
+    }
+
+    const body = {
+        amount: parseFloat(amount),
+        spoiled: Boolean(spoiled)
+    };
+
+    if (stockId) {
+        body.stock_entry_id = stockId;
+    }
+
+    return await grocyApiPostRequest(settings, `stock/products/${productId}/consume`, body);
+}
+
 async function getWeatherData(apiKey, location, units) {
     if (!apiKey || !location) return null;
     const encodedLocation = encodeURIComponent(location);
@@ -122,4 +186,4 @@ async function getWeatherData(apiKey, location, units) {
     return null;
 }
 
-module.exports = { getVolatileStock, getWeatherData, getAllShoppingLists, getShoppingListItems };
+module.exports = { getVolatileStock, getWeatherData, getAllShoppingLists, getShoppingListItems, addProductToShoppingList, consumeProduct };

@@ -1,12 +1,25 @@
 <%- include('partials/header') %>
 <h1>Low Stock Items</h1>
-<ul class="item-list">
+<ul class="item-list" id="low-stock-list">
     <% if (lowStock.length > 0) { %>
         <% lowStock.forEach(item => { %>
-            <li>
-                <span class="item-name"><%= item.product_name %></span>
-                <span class="item-detail">Currently <%= item.amount %> in stock</span>
+            <li data-product-id="<%= item.product_id %>" data-stock-id="<%= item.id %>" data-amount="<%= item.amount %>">
+                <div class="item-info">
+                    <span class="item-name"><%= item.product_name %></span>
+                    <span class="item-detail">Currently <%= item.amount %> in stock</span>
+                </div>
+                 <% if (showActions) { %>
+                    <div class="item-actions">
+                        <select class="action-shopping-list">
+                            <% shoppingLists.forEach(list => { %>
+                                <option value="<%= list.id %>"><%= list.name %></option>
+                            <% }); %>
+                        </select>
+                        <button class="btn btn-add-list">Add to List</button>
+                    </div>
+                <% } %>
             </li>
+        
         <% }); %>
     <% } else { %>
         <p>No items are low on stock.</p>
