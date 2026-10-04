@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const { db } = require('../database.js');
-const { getVolatileStock, getWeatherData, getAllShoppingLists, getShoppingListItems } = require('../services/grocy-service.js');
+const { getVolatileStock, getWeatherData, getAllShoppingLists, getShoppingListItems, addProductToShoppingList, consumeProduct } = require('../services/grocy-service.js');
 
 function isAuthenticated(req, res, next) {
     if (req.session.userId) {
@@ -28,13 +28,13 @@ async function getGrocySettings(req, res, next) {
         }
         res.locals.settings = settings || {};
         res.locals.checkInterval = (settings && settings.check_interval) ? settings.check_interval * 1000 : 300000;
-        res.locals.timezone = req.app.locals.timezone;
-		next();
+        res.locals.timezone = req.app.locals.timezone || process.env.APP_TIMEZONE || '';
+        next();
     } catch (err) {
         console.error('Error fetching settings in middleware:', err.message);
         req.session.message = { type: 'error', text: 'Failed to load settings.' };
-        res.locals.timezone = req.app.locals.timezone;
-		return res.redirect('/settings');
+        res.locals.timezone = req.app.locals.timezone || process.env.APP_TIMEZONE || '';
+        return res.redirect('/settings');
     }
 }
 
@@ -55,6 +55,7 @@ router.post('/login', async (req, res) => {
         if (match) {
             req.session.userId = user.id;
             req.session.username = user.username;
+            req.session.isAdmin = user.isAdmin;
             res.redirect('/');
         } else {
             res.render('login', { error: 'Invalid username or password.' });
@@ -73,12 +74,21 @@ router.get('/logout', (req, res) => {
 
 async function renderGrocyPage(req, res, view, pageData = {}) {
     try {
-        const data = await getVolatileStock(res.locals.settings);
+        const settings = res.locals.settings;
+        const [data, shoppingLists] = await Promise.all([
+            getVolatileStock(settings),
+            getAllShoppingLists(settings)
+        ]);
+
         if (!data) {
             req.session.message = { type: 'error', text: 'Could not connect to Grocy. Please check your URL and API key in settings.' };
             return res.redirect('/settings');
         }
-        res.render(view, { ...data, ...pageData });
+
+        const showActions = settings.enable_stock_actions && 
+                            (!settings.stock_actions_admin_only || (settings.stock_actions_admin_only && req.session.isAdmin));
+
+        res.render(view, { ...data, shoppingLists: shoppingLists || [], showActions, ...pageData });
     } catch (error) {
         console.error("Error in renderGrocyPage:", error);
         req.session.message = { type: 'error', text: 'An unexpected error occurred while fetching Grocy data.' };
@@ -143,8 +153,11 @@ router.get('/grocery-list', isAuthenticated, getGrocySettings, async (req, res) 
     const settings = res.locals.settings;
     try {
         const allLists = await getAllShoppingLists(settings);
+        const defaultShoppingListId = settings.default_shopping_list_id || (allLists[0] ? allLists[0].id : 1);
+
         res.render('grocery-list', {
             shoppingLists: allLists,
+            defaultShoppingListId,
             pageTitle: 'Grocery Lists'
         });
     } catch (error) {
@@ -165,6 +178,56 @@ router.get('/api/grocery-list-items', isAuthenticated, getGrocySettings, async (
     }
 });
 
+router.post('/api/stock/add-to-list', isAuthenticated, getGrocySettings, async (req, res) => {
+    const settings = res.locals.settings;
+    const { productId, listId } = req.body;
+
+    const hasPermission = settings.enable_stock_actions && 
+                          (!settings.stock_actions_admin_only || (settings.stock_actions_admin_only && req.session.isAdmin));
+
+    if (!hasPermission) {
+        return res.status(403).json({ error: 'Permission denied.' });
+    }
+
+    try {
+        const result = await addProductToShoppingList(settings, productId, listId);
+        if (result) {
+            res.json({ success: true, message: 'Item added to list.' });
+        } else {
+            throw new Error('Failed to add item to list');
+        }
+    } catch (error) {
+        console.error('API Error adding to shopping list:', error);
+        res.status(500).json({ error: 'Failed to add item to list' });
+    }
+});
+
+router.post('/api/stock/remove-spoiled', isAuthenticated, getGrocySettings, async (req, res) => {
+    const settings = res.locals.settings;
+    const { productId, amount, stockId } = req.body;
+
+    const hasPermission = settings.enable_stock_actions && 
+                          (!settings.stock_actions_admin_only || (settings.stock_actions_admin_only && req.session.isAdmin));
+
+    if (!hasPermission) {
+        return res.status(403).json({ error: 'Permission denied.' });
+    }
+
+    try {
+
+        const parsedAmount = parseFloat(amount) || 1;
+        const parsedProductId = parseInt(productId, 10);
+        const parsedStockId = stockId ? parseInt(stockId, 10) : null;
+
+        const result = await consumeProduct(settings, parsedProductId, parsedAmount, parsedStockId, true);
+
+        res.json({ success: true, message: 'Item marked as spoiled.', result });
+    } catch (error) {
+        console.error('API Error marking item as spoiled:', error.message || error);
+        res.status(500).json({ error: error.message || 'Failed to mark item as spoiled' });
+    }
+});
+
 router.get('/settings', isAuthenticated, getGrocySettings, async (req, res) => {
     try {
         const settings = await db.get("SELECT * FROM settings WHERE id = 1");
@@ -177,7 +240,8 @@ router.get('/settings', isAuthenticated, getGrocySettings, async (req, res) => {
             settings: settings || {},
             users: users || [],
             currentUser: { id: req.session.userId, username: req.session.username },
-            shoppingLists: shoppingLists || []
+            shoppingLists: shoppingLists || [],
+            isAdmin: req.session.isAdmin
         });
 
     } catch (error) {
@@ -186,7 +250,8 @@ router.get('/settings', isAuthenticated, getGrocySettings, async (req, res) => {
             settings: {},
             users: [],
             currentUser: { id: req.session.userId, username: req.session.username },
-            shoppingLists: []
+            shoppingLists: [],
+            isAdmin: req.session.isAdmin
         });
     }
 });
@@ -235,8 +300,27 @@ router.post('/settings/weather', isAuthenticated, async (req, res) => {
     }
 });
 
+router.post('/settings/stock-actions', isAuthenticated, async (req, res) => {
+    const { enable_stock_actions, stock_actions_admin_only } = req.body;
+    try {
+        await db.run(
+            `UPDATE settings SET enable_stock_actions = ?, stock_actions_admin_only = ? WHERE id = 1`,
+            [
+                enable_stock_actions === 'on' ? 1 : 0,
+                stock_actions_admin_only === 'admin' ? 1 : 0
+            ]
+        );
+        req.session.message = { type: 'success', text: 'Stock action settings saved successfully!' };
+    } catch (err) {
+        console.error('Stock action settings save error:', err.message);
+        req.session.message = { type: 'error', text: 'Failed to save stock action settings.' };
+    } finally {
+        res.redirect('/settings');
+    }
+});
+
 router.post('/settings/user/add', isAuthenticated, async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, isAdmin } = req.body;
     if (!username || !password) {
         req.session.message = { type: 'error', text: 'Username and password cannot be empty.' };
         return res.redirect('/settings');
@@ -244,8 +328,8 @@ router.post('/settings/user/add', isAuthenticated, async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
         await db.run(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            [username, hashedPassword]
+            "INSERT INTO users (username, password, isAdmin) VALUES (?, ?, ?)",
+            [username, hashedPassword, isAdmin === 'true' ? 1 : 0]
         );
         req.session.message = { type: 'success', text: `User '${username}' created successfully!` };
     } catch (err) {
@@ -314,4 +398,3 @@ router.post('/settings/user/change-password', isAuthenticated, async (req, res) 
 });
 
 module.exports = router;
-
