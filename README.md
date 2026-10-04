@@ -70,10 +70,7 @@ This is the simplest method to get Restoqit running in minutes.
 
 _Note: A `restoqit_data` folder will be created in the same directory to store the database, ensuring your settings and users persist._
 
-
 2.  **Create a `.env` file:** Create a new file named `.env` in the same directory as your `docker-compose.yml` file and configure your application's environment variables.
-    
-      
     
     Code snippet
     
@@ -99,12 +96,8 @@ _Note: A `restoqit_data` folder will be created in the same directory to store t
     ```
     
     _Note: The Grocy and weather API keys are not set here. They are configured in the application's settings page after the container is running._
-    
-      
-    
+
 3.  **Start the container:** Open a terminal in the same directory as your `docker-compose.yml` file and run:
-    
-      
     
     Bash
     
@@ -114,103 +107,54 @@ _Note: A `restoqit_data` folder will be created in the same directory to store t
     ```
     
 4.  **Access Restoqit:** Open your browser and navigate to `http://localhost:8686`. If your network supports mDNS, you may also be able to use `http://restoqit.local:8686`.
-    
-      
-    
 
 ## First-Time Setup
 
 Upon first launch, you will be prompted to log in.
 
-  
-
 -   **Default Username:**  `admin`
-    
-      
     
 -   **Default Password:**  `password`
     
-      
-    
-
 **IMPORTANT:** Immediately after logging in, go to the **Settings** page to configure the application. It is highly recommended that you change the default admin password.
-
-  
 
 You must configure:
 
-  
-
 1.  **Grocy URL:** The full URL to your Grocy instance (e.g., `http://192.168.1.50:9283`).
-    
-      
-    
+  
 2.  **Grocy API Key:** Your API key generated within Grocy.
-    
-      
-    
-3.  **Default Grocery List:** Select the list that will be displayed on the overview page for quick access. _Note: The options will populate automatically after your Grocy URL and API key are saved and correct._
-    
-      
-    
+  
+3.  **Default Grocery List:** Select the list that will be displayed on the overview page for quick access. _Note: The options will populate automatically after your Grocy URL and API key are saved and correct._  
 
 ### Optional Settings
 
 After setting up your Grocy connection, you can further customize your dashboard by configuring the following optional features on the settings page:
 
-  
-
--   **Grocy Write Access:** Controls whether Restoqit can modify data in your Grocy instance. Enable this to unlock "Add to List" and "Remove (Spoil)" buttons on the stock pages. You can restrict these actions to Admins only. Leave this disabled if you want to use Restoqit strictly as a read-only display.
+-   **Grocy Write Access:** Control whether Restoqit can modify data in your Grocy instance. Enable `Interactive Stock Actions` to unlock "Add to List" and "Remove (Spoil)" buttons for items. You can restrict these actions to Admins only. Leave this disabled if you want access to your Grocy to remain read-only.   
     
-      
-    
--   **Weather API Settings:** Enter an OpenWeatherMap API key and your location to display local weather on the dashboard. For the best results, use the format: **City, State, Country** (e.g., New York, NY, USA).
-    
-      
+-   **Weather API Settings:** Enter an OpenWeatherMap API key and your location to display local weather on the dashboard. For the best results, use the format: **City, State, Country** (e.g., New York, NY, USA).  
     
 -   **Display Settings:** Customize the weather metric, date, and time formats to your preference.
-    
-      
-    
 
 ## Manual Installation (Alternative)
 
-If you prefer to run the application directly without Docker:
+If you prefer to run the application directly without Docker using a release build:
 
-  
+1. **Prerequisites:**
+   - [Node.js](https://nodejs.org/) (v18 or later)
+   - npm
 
-1.  **Prerequisites:**
-    
-      
-    -   [Node.js](https://nodejs.org/) (v16 or later)
-        
-          
-        
-    -   npm
-        
-          
-        
-2.  **Clone the repository and navigate to the app folder:**
-    
-      
-    
-    Bash
-    
-    ```
-    git clone [https://github.com/KenWeTech/Restoqit.git](https://github.com/KenWeTech/Restoqit.git)
-    cd Restoqit/restoqit
-    
-    ```
-    
-3.  **Install dependencies and run:**
-    
-      
-    
-    Bash
-    
-    ```
-    npm install
-    npm start
+2. **Download and extract the latest release:**
+   - Go to [Releases](https://github.com/KenWeTech/Restoqit/releases) and download the latest release archive (`Restoqit-vX.X.X.zip`).
+   - Extract the contents and navigate to the project directory in your terminal:
+     ```bash
+     cd Restoqit
+     ```
+
+3. **Install dependencies and run:**
+   ```bash
+   npm install
+   npm start
     
     ```
     
