@@ -39,7 +39,7 @@ jobs:
 
           labels: |
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}
-            org.opencontainers.image.description=Restoqit is an app that shows simple overview of things you might need to restock for your Grocy instance.
+            org.opencontainers.image.description="Restoqit is an app that shows simple overview of things you might need to restock for your Grocy instance."
             org.opencontainers.image.licenses=
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
@@ -48,7 +48,7 @@ jobs:
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
 
           annotations: |
-            org.opencontainers.image.description=Restoqit is an app that shows simple overview of things you might need to restock for your Grocy instance.
+            org.opencontainers.image.description="Restoqit is an app that shows simple overview of things you might need to restock for your Grocy instance."
             org.opencontainers.image.title=Restoqit
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
 
